@@ -1,3 +1,6 @@
+#ifndef _STATE_HH_
+#define _STATE_HH_
+
 #include <Eigen/Core>
 
 #include "basic.hh"
@@ -36,7 +39,7 @@ public:
         col(k) = D.col(k) / hint;
         for (int j = 0; j < cols(); ++j)
             if (j != k)
-                col(j) = D.col(j) - (col(j).dot(v) * col(k));
+                col(j) = D.col(j) - (D.col(j).dot(v) * col(k));
 
     }
 };
@@ -94,6 +97,12 @@ struct Lookup : public VectorI
     {
         return segment(0,dim);
     }
+
+    inline void pivot_from (const Lookup& tab, int out, int in)
+    {
+        (*this) = tab;
+        pivot (out, in);
+    }
 };
 
 class State
@@ -129,6 +138,16 @@ public:
         #endif
     }
 
+    void update_res (double step)
+    {
+        res = A * x - b;
+    }
+
+    void update_res_from (const ColVector& r, double step)
+    {
+        res = A * x - b;
+    }
+
     bool leave (int k, double sgn = 1.0)
     {
         assert (k >= 0 && k < n);
@@ -156,10 +175,11 @@ public:
         x += min_step * sgn * inv.col(k);
         inv.pivot (k, A.row(min_row), Ad(min_row));
         tab.pivot (k, min_key);
-
-        res = A * x - b;    // TODO update residual
+        update_res (min_step);
         return true;
     }
+
+    bool leave_from (const State& S, int k);
 
     bool check() const
     {
@@ -195,3 +215,5 @@ public:
         assert (check());
     }
 };
+
+#endif

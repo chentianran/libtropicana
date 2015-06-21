@@ -17,8 +17,8 @@ include_directories ("${Boost_INCLUDE_DIRS}")
 include_directories ("${EIGEN3_INCLUDE_DIR}")
 include_directories ("${CMAKE_CURRENT_LIST_DIR}")
 
-add_executable (trop main.cc)
-#cuda_add_executable (ax-cuda ax-cuda.cu)
-#cuda_add_executable (deviceQuery deviceQuery.cu)
+add_executable (trop
+    state.hh state.cc
+    main.cc)
 
 target_link_libraries (trop ${Boost_LIBRARIES})

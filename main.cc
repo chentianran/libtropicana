@@ -51,6 +51,7 @@ int main ()
     b.setRandom();
 
     State state (A,b);
+    State state2 (A,b);
 
     cout << A << endl;
     cout << b << endl;
@@ -59,14 +60,10 @@ int main ()
 
     LOGVAR (0, state.tab.active());
 
-    state.leave(0);
-    assert (state.check());
+    state2.leave_from (state, 0);
+    LOGVAR (0, state2.tab.active());
 
-    LOGVAR (0, state.tab.active());
-
-    state.leave(1);
-    assert (state.check());
-
+    state.leave_from (state2, 0);
     LOGVAR (0, state.tab.active());
 
     //cout << "B*D = \n" << (B*D) << endl << endl;
