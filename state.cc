@@ -1,5 +1,35 @@
 #include "state.hh"
 
+bool State::leave (int k, double sgn)
+{
+    assert (k >= 0 && k < n);
+
+    double min_step = 0.0;
+    int    min_key  = -1;
+    int    min_row  = -1;
+
+    for (int i = tab.inactive; i < tab.end; ++i) {
+        int row_id = tab(i);
+        assert (row_id >= 0 && row_id < m);
+        if ( (Ad(row_id) = sgn * A.row(row_id) * inv.col(k)) < 0.0) {
+            double step = - res(row_id) / Ad(row_id);
+            if (-1 == min_key || step < min_step) {
+                min_step = step;
+                min_key  = i;
+                min_row  = row_id;
+            }
+        }
+    }
+
+    if (-1 == min_key)
+        return false;
+
+    x += min_step * sgn * inv.col(k);
+    inv.pivot (k, A.row(min_row), Ad(min_row));
+    tab.pivot (k, min_key);
+    update_res (min_step);
+    return true;
+}
 
 bool State::leave_from (const State& S, int k)
 {
@@ -31,6 +61,22 @@ bool State::leave_from (const State& S, int k)
     update_res_from (S.res, min_step);
 
     assert (check());
-    
+
+    return true;
+}
+
+bool State::check() const
+{
+    assert ((A*x-b - res).norm() < 1e-14);
+    for (int k = 0; k < n; ++k) {
+        if (tab(k) >= 0) {
+            assert (tab(k) < m);
+            RowVector ek = A.row(tab(k)) * inv;
+            for (int j = 0; j < n; ++j)
+                assert (fabs(ek(j) - ( (j==k) ? 1.0 : 0.0)) < 1e-13);
+            assert (fabs(res(tab(k))) < 1e-13);
+        }
+    }
+
     return true;
 }
