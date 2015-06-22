@@ -5,6 +5,7 @@ project (trop CXX)
 
 #set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DBOOST_NOINLINE='__attribute__ ((noinline))'")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 find_package (Boost 1.44.0 REQUIRED COMPONENTS system timer)
 
@@ -20,6 +21,7 @@ include_directories ("${CMAKE_CURRENT_LIST_DIR}")
 add_executable (trop
     inverse.hh
     lookup.hh
+    primes.cc
     state.hh state.cc
     main.cc)
 

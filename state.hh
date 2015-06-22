@@ -55,10 +55,15 @@ public:
 
     void phase1()
     {
+        cout << "Initial tab: " << tab << endl;
+        
         x.setZero();
-        x(n-1) = - b.minCoeff() - 0.01;
+        x(n-1) = - b.maxCoeff() - 0.01;
         inv.setIdentity();
+
         res = A * x - b;
+
+        LOGVAR(0,res);
 
         for (int k = 0; k < n; ++k)
             if (! leave (k, 1.0))
