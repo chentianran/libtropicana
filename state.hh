@@ -9,7 +9,7 @@ class State
 {
 public:
 
-    const RowMatrix& A;      // constraint matrix
+    const RowMatrix& A;     // constraint matrix
     const ColVector& b;     // right hand side
     int              n;
     int              m;     // total number of constraints
@@ -51,26 +51,9 @@ public:
     bool leave (int k, double sgn = 1.0);
     bool leave_from (const State& S, int k);
 
+    void phase1();
+
     bool check() const;
-
-    void phase1()
-    {
-        cout << "Initial tab: " << tab << endl;
-        
-        x.setZero();
-        x(n-1) = - b.maxCoeff() - 0.01;
-        inv.setIdentity();
-
-        res = A * x - b;
-
-        LOGVAR(0,res);
-
-        for (int k = 0; k < n; ++k)
-            if (! leave (k, 1.0))
-                leave (k, -1.0);
-
-        assert (check());
-    }
 };
 
 #endif

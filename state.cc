@@ -4,8 +4,6 @@ bool State::leave (int k, double sgn)
 {
     assert (k >= 0 && k < n);
 
-    cout << "leave tab: " << tab << endl;
-
     double min_step = 0.0;
     int    min_key  = -1;
     int    min_row  = -1;
@@ -30,8 +28,6 @@ bool State::leave (int k, double sgn)
     inv.pivot (k, A.row(min_row), Ad(min_row));
     tab.pivot (k, min_key);
     update_res (min_step);
-
-    LOGVAR(0, Ad(min_row));
 
     assert (check());
 
@@ -70,6 +66,25 @@ bool State::leave_from (const State& S, int k)
     assert (check());
 
     return true;
+}
+
+void State::phase1()
+{
+    cout << "Initial tab: " << tab << endl;
+
+    x.setZero();
+    x(n-1) = - b.maxCoeff() - 0.01;
+    inv.setIdentity();
+
+    res = A * x - b;
+
+    LOGVAR(0,res);
+
+    for (int k = 0; k < n; ++k)
+        if (! leave (k, 1.0))
+            leave (k, -1.0);
+
+    assert (check());
 }
 
 bool State::check() const
