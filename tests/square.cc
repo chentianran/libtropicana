@@ -1,12 +1,7 @@
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-
 #include <boost/test/unit_test.hpp>
 #include <trop.hh>
 
-#include <iostream>
-
-BOOST_AUTO_TEST_CASE(hnf)
+BOOST_AUTO_TEST_CASE(square)
 {
     const int W = 2, H = 2;
     RowMatrix A ((W+1)*(H+1),2);
@@ -16,8 +11,6 @@ BOOST_AUTO_TEST_CASE(hnf)
             A.row(i*(W+1)+j)(1) = j;
         }
     }
-
-    std::cout << A << std::endl;
 
     Trop trop;
     trop.compute (A);

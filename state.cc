@@ -70,15 +70,11 @@ bool State::leave_from (const State& S, int k)
 
 void State::phase1()
 {
-    cout << "Initial tab: " << tab << endl;
-
     x.setZero();
     x(n-1) = - b.maxCoeff() - 0.01;
     inv.setIdentity();
 
     res = A * x - b;
-
-    LOGVAR(0,res);
 
     for (int k = 0; k < n; ++k)
         if (! leave (k, 1.0))

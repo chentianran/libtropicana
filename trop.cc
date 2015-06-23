@@ -55,7 +55,6 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
             }
         }
 
-        LOGVAR (0, state->tab.active());
         Cell cell (*state);
 
         volume += cell.vol();

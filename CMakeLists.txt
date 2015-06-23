@@ -31,6 +31,9 @@ target_link_libraries (tropicon tropicana)
 add_executable(pivot-perf tests/pivot_perf.cc)
 target_link_libraries (pivot-perf tropicana)
 
-add_executable(test-square tests/square.cc)
-target_link_libraries (test-square tropicana)
+add_executable(tests
+    tests/square.cc
+    tests/cube.cc
+    tests/main.cc)
+target_link_libraries (tests tropicana)
 #add_test( square)
