@@ -23,7 +23,13 @@ using std::string;
 }
 
 #define WARNING(message) { clog << "WARNING: " << message << endl; }
+
+#ifndef NDEBUG
 #define LOGVAR(i,VAR) { { clog << #VAR " = " << VAR << endl; } }
 #define LOG(i,msg)    { { clog << msg << endl; } }
+#else
+#define LOGVAR(i,VAR) {  }
+#define LOG(i,msg)    {  }
+#endif
 
 #endif

@@ -61,4 +61,7 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
 
         heap.push_front (state);
     }
+
+    for (State* s : heap)
+        delete s;
 }
