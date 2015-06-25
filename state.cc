@@ -41,6 +41,7 @@ bool State::leave_from (const State& S, int k)
     double min_step = 0.0;
     int    min_key  = -1;
     int    min_row  = -1;
+    int    n_neg    =  0;   // number of negative entries
 
     for (int i = S.tab.inactive; i < S.tab.end; ++i) {
         int row_id = S.tab(i);
@@ -52,8 +53,12 @@ bool State::leave_from (const State& S, int k)
                 min_key  = i;
                 min_row  = row_id;
             }
+            ++ n_neg;
         }
     }
+
+    if (1 == n_neg)
+        WARNING ("interior point: " << min_row);
 
     if (-1 == min_key)
         return false;

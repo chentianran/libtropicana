@@ -16,6 +16,8 @@ using std::ostream_iterator;
 using std::copy;
 using std::string;
 
+extern int _trop_verbose;
+
 #define ERROR(message) { \
     std::stringstream s; \
     s << message; \
@@ -25,8 +27,8 @@ using std::string;
 #define WARNING(message) { clog << "WARNING: " << message << endl; }
 
 #ifndef NDEBUG
-#define LOGVAR(i,VAR) { { clog << #VAR " = " << VAR << endl; } }
-#define LOG(i,msg)    { { clog << msg << endl; } }
+#define LOGVAR(i,VAR) { if(i <= _trop_verbose) { clog << #VAR " = " << VAR << endl; } }
+#define LOG(i,msg)    { if(i <= _trop_verbose) { clog << msg << endl; } }
 #else
 #define LOGVAR(i,VAR) {  }
 #define LOG(i,msg)    {  }

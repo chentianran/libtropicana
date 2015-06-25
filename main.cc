@@ -49,6 +49,8 @@ int main ()
         cout << A << endl;
 
         Trop trop;
+
+
         trop.compute (A);
 
         cout << "Volume: " << trop.volume << endl;

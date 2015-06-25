@@ -19,6 +19,7 @@ include_directories ("${CMAKE_CURRENT_LIST_DIR}")
 add_library(tropicana SHARED
     inverse.hh
     lookup.hh
+    debug.hh debug.cc
     state.hh state.cc
     cell.hh cell.cc
     trop.hh trop.cc)

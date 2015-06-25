@@ -1,14 +1,23 @@
+#define EIGEN_RUNTIME_NO_MALLOC
+
 #include <forward_list>
 #include <unordered_set>
 #include "trop.hh"
 #include "state.hh"
 #include "cell.hh"
 
+void Trop::more_verbose() { ++ _trop_verbose; }
+void Trop::less_verbose() { -- _trop_verbose; }
+
 void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
 {
-    int n = supp.cols();
-    int m = supp.rows();
-    int N = n + 1;
+    const int n = supp.cols();
+    const int m = supp.rows();
+    const int N = n + 1;
+
+    int dup_discover = 0;
+    int max_pool = 0;
+    int total_cells = 0;
 
     RowMatrix A (m, n+1);
     ColVector b (m);
@@ -29,6 +38,8 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
 
     volume = 0;
 
+    long long pool_size = 1;
+
     while (! pool.empty()) {
         state = pool.front();
         pool.pop_front();
@@ -43,16 +54,20 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
                 new_state = new State (A,b);
             }
 
+            Eigen::internal::set_is_malloc_allowed(false);
             if (new_state->leave_from (*state, k)) {
                 if (known.end() == known.find (new_state->tab.key)) {
                     known.insert (new_state->tab.key);
                     pool.push_front (new_state);
+                    ++ pool_size;
                 } else {
                     heap.push_front (new_state);
+                    ++ dup_discover;
                 }
             } else {
                 heap.push_front (new_state);
             }
+            Eigen::internal::set_is_malloc_allowed(true);
         }
 
         Cell cell (*state);
@@ -60,8 +75,16 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
         volume += cell.vol();
 
         heap.push_front (state);
+        -- pool_size;
+
+        ++ total_cells;
+
+        LOG(1, "pool: " << pool_size);
     }
 
+    LOG(0, "total cells: " << total_cells);
+    LOG(0, "duplicated:  " << dup_discover);
+    
     for (State* s : heap)
         delete s;
 }

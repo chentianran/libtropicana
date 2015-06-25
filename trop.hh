@@ -5,6 +5,9 @@
 
 struct Trop
 {
+    static void more_verbose();
+    static void less_verbose();
+
     VolType volume;
 
     void compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol = true);
