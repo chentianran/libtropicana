@@ -1,6 +1,7 @@
 #ifndef _STATE_HH_
 #define _STATE_HH_
 
+#include <utility>
 #include <Eigen/Core>
 #include "inverse.hh"
 #include "lookup.hh"
@@ -16,8 +17,14 @@ public:
     Inverse          inv;   // Basic inverse Matrix
     Lookup           tab;   // lookup table for contraints
     ColVector        x;     // state variable x
-    ColVector        Ad;    // buffer for A*d
     ColVector        res;   // residual = Ax - b;
+
+    struct PivotInfo
+    {
+        int    tab_id;
+        int    row_id;
+        double step;
+    };
 
     State (const RowMatrix& _A, const ColVector& _b) :
         A(_A),
@@ -25,7 +32,6 @@ public:
         inv(_A.cols()),
         tab(A.cols(),A.rows()),
         x(_A.cols()),
-        Ad(_A.rows()),
         res(_A.rows())
     {
         assert (A.rows() == b.size());
@@ -48,10 +54,14 @@ public:
         res = A * x - b;
     }
 
-    bool leave (int k, double sgn = 1.0);
-    bool leave_from (const State& S, int k);
+    bool leave (ColVector& Ad, int k, double sgn = 1.0);
+    //bool leave_from (const State& S, const ColMatrix& AD, int k);
 
     void phase1();
+    //void conv();
+    void branch_out (ColMatrix& AD) const;
+    PivotInfo try_leave (const ColMatrix& AD, int k) const;
+    void finish_leave (const State& S, const ColMatrix& AD, int k, const PivotInfo& info);
 
     bool check() const;
 };

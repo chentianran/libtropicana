@@ -10,13 +10,12 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 find_package (Boost 1.44.0 REQUIRED COMPONENTS system timer unit_test_framework)
 
 find_package (Eigen3 REQUIRED)
-#find_package (CUDA REQUIRED)
 
 include_directories ("${Boost_INCLUDE_DIRS}")
 include_directories ("${EIGEN3_INCLUDE_DIR}")
 include_directories ("${CMAKE_CURRENT_LIST_DIR}")
 
-add_library(tropicana SHARED
+add_library(tropicana STATIC
     inverse.hh
     lookup.hh
     debug.hh debug.cc

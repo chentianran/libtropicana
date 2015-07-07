@@ -1,6 +1,6 @@
 #include "state.hh"
 
-bool State::leave (int k, double sgn)
+bool State::leave (ColVector& Ad, int k, double sgn)
 {
     assert (k >= 0 && k < n);
 
@@ -34,47 +34,10 @@ bool State::leave (int k, double sgn)
     return true;
 }
 
-bool State::leave_from (const State& S, int k)
-{
-    assert (k >= 0 && k < n);
-
-    double min_step = 0.0;
-    int    min_key  = -1;
-    int    min_row  = -1;
-    int    n_neg    =  0;   // number of negative entries
-
-    for (int i = S.tab.inactive; i < S.tab.end; ++i) {
-        int row_id = S.tab(i);
-        assert (row_id >= 0 && row_id < m);
-        if ( (Ad(row_id) = A.row(row_id) * S.inv.col(k)) < -1e-8) {
-            double step = - S.res(row_id) / Ad(row_id);
-            if (-1 == min_key || step < min_step) {
-                min_step = step;
-                min_key  = i;
-                min_row  = row_id;
-            }
-            ++ n_neg;
-        }
-    }
-
-    if (1 == n_neg)
-        WARNING ("interior point: " << min_row);
-
-    if (-1 == min_key)
-        return false;
-
-    x = S.x + min_step * S.inv.col(k);
-    inv.pivot_from (S.inv, k, A.row(min_row), Ad(min_row));
-    tab.pivot_from (S.tab, k, min_key);
-    update_res_from (S.res, min_step);
-
-    assert (check());
-
-    return true;
-}
-
 void State::phase1()
 {
+    ColVector Ad (m);
+
     x.setZero();
     x(n-1) = - b.maxCoeff() - 0.01;
     inv.setIdentity();
@@ -82,8 +45,63 @@ void State::phase1()
     res = A * x - b;
 
     for (int k = 0; k < n; ++k)
-        if (! leave (k, 1.0))
-            leave (k, -1.0);
+        if (! leave (Ad, k, 1.0))
+            leave (Ad, k, -1.0);
+
+    assert (check());
+}
+
+void State::branch_out (ColMatrix& AD) const
+{
+    for (int i = tab.inactive; i < tab.end; ++i) {
+        int row_id = tab(i);
+        AD.row(row_id) = A.row(row_id) * inv;
+        int n_neg = 0;
+        for (int k = 0; k < n; ++k) {
+            if (AD.row(row_id)(k) < -1e-8)
+                ++ n_neg;
+        }
+        if (0 == n_neg) {
+            WARNING ("Redundant: " << row_id);
+        }
+    }
+}
+
+State::PivotInfo State::try_leave (const ColMatrix& AD, int k) const
+{
+    assert (k >= 0 && k < n);
+
+    double min_step   = 0.0;
+    int    min_tab_id = -1;
+    int    min_row_id = -1;
+
+    for (int i = tab.inactive; i < tab.end; ++i) {
+        int row_id = tab(i);
+        assert (row_id >= 0 && row_id < m);
+        double AiDk = AD.col(k)(row_id);
+        if (AiDk < -1e-8) {
+            double step = - res(row_id) / AiDk;
+            if (-1 == min_tab_id || step < min_step) {
+                min_step = step;
+                min_tab_id = i;
+                min_row_id = row_id;
+            }
+        }
+    }
+
+    return PivotInfo {min_tab_id, min_row_id, min_step};
+}
+
+void State::finish_leave (const State& S, const ColMatrix& AD, int k, const PivotInfo& info)
+{
+    assert (info.tab_id >= S.tab.inactive && info.tab_id < S.tab.end);
+    assert (info.row_id >= 0 && info.row_id < S.m);
+    assert (info.step > 0.0);
+
+    x = S.x + info.step * S.inv.col(k);
+    inv.pivot_from (S.inv, k, A.row(info.row_id), AD.col(k)(info.row_id));
+    tab.pivot_from (S.tab, k, info.tab_id);
+    update_res_from (S.res, info.step);
 
     assert (check());
 }

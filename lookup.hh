@@ -2,8 +2,7 @@
 #define _LOOKUP_HH_
 
 #include "basic.hh"
-
-typedef vector<bool> Key;
+#include "key.hh"
 
 struct Lookup : public VectorI
 {
@@ -20,7 +19,8 @@ struct Lookup : public VectorI
             (*this)(i) = -1;
         for (int i = 0; i < m; ++i)
             (*this)(n+i) = i;
-        key.assign (m, false);
+        key.reset();
+        //key.assign (m, false);
     }
 
     inline void activate (int out, int in)
@@ -30,7 +30,7 @@ struct Lookup : public VectorI
         assert (false == key[(*this)(in)]);
         assert ((*this)(out) < 0);
 
-        key[ (*this)(in) ] = true;              // set the corresponding bit in the key to 1
+        key.set ((*this)(in));                  // set the corresponding bit in the key to 1
         (*this)(out) = (*this)(in);             // move it into the active group
         (*this)(in)  = (*this)(end - 1);        // last inactive move into this slot
         -- end;                                 // we got one less inactive constraint
@@ -48,17 +48,17 @@ struct Lookup : public VectorI
         if ((*this)(out) < 0)
             activate (out, in);
         else {
-            key[(*this)(in) ] = true;
-            key[(*this)(out)] = false;
+            key.set   ((*this)(in));
+            key.reset ((*this)(out));
             std::swap ((*this)(in), (*this)(out));
         }
     }
 
-    inline void remove (int key)
+    inline void remove (int id)
     {
-        assert (key >= inactive && key < end);      // the one coming in should be inactive
+        assert (id >= inactive && id < end);      // the one coming in should be inactive
 
-        (*this)(key) = (*this)(end - 1);
+        (*this)(id) = (*this)(end - 1);
         -- end;
     }
 
@@ -80,6 +80,8 @@ struct Lookup : public VectorI
                 assert (true == key[(*this)(i)]);
         for (int i = inactive; i < end; ++i)
             assert (false == key[(*this)(i)]);
+
+        return true;
     }
 };
 
