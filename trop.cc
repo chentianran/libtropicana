@@ -69,46 +69,30 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
         state->branch_out (AD);
 
         for (int k = 0; k < N; ++k) {
-            int out_row = state->tab(k);
-            if (out_row >= 0) {
-                State::PivotInfo info = state->try_leave (AD, k);
-                if (info.tab_id >= 0) {
-                    Key key = state->tab.key;
-                    key.set   (info.row_id);
-                    key.reset (out_row);
-                    if (known.end() == known.find (key)) {
-                        known.insert (key);
-                        State* branch = new_state(A,b);
-                        branch->finish_leave (*state, AD, k, info);
-                        pool.push_front (branch);
-                        ++ pool_size;
-                    } else {
-                        ++ dup_discover;
+            if (! state->known_dir[k]) {
+                int out_row = state->tab(k);
+                if (out_row >= 0) {
+                    State::PivotInfo info = state->try_leave (AD, k);
+                    if (info.tab_id >= 0) {
+                        Key key = state->tab.key;
+                        key.set   (info.row_id);
+                        key.reset (out_row);
+                        if (known.end() == known.find (key)) {
+                            known.insert (key);
+                            State* branch = new_state(A,b);
+                            branch->finish_leave (*state, AD, k, info);
+                            pool.push_front (branch);
+                            ++ pool_size;
+
+                            //cout << state->tab.active() << " -> " << branch->tab.active() << "  (leaving " << k << ")" << endl;
+
+                        } else {
+                            //cout << state->tab.active() << " -> " << info.row_id << " in  (leaving " << k << ")" << endl;
+                            ++ dup_discover;
+                        }
                     }
                 }
             }
-
-            //if (! heap.empty()) {
-            //    new_state = heap.front();
-            //    heap.pop_front();
-            //} else {
-            //    new_state = new State (A,b);
-            //}
-            //Eigen::internal::set_is_malloc_allowed(false);
-
-            //if (new_state->leave_from (*state, AD, k)) {
-            //    if (known.end() == known.find (new_state->tab.key)) {
-            //        known.insert (new_state->tab.key);
-            //        pool.push_front (new_state);
-            //        ++ pool_size;
-            //    } else {
-            //        heap.push_front (new_state);
-            //        ++ dup_discover;
-            //    }
-            //} else {
-            //    heap.push_front (new_state);
-            //}
-            //Eigen::internal::set_is_malloc_allowed(true);
         }
 
         Cell cell (*state);
@@ -116,7 +100,6 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
         volume += cell.vol();
 
         del_state (state);
-        //heap.push_front (state);
         -- pool_size;
 
         ++ total_cells;

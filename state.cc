@@ -27,11 +27,40 @@ bool State::leave (ColVector& Ad, int k, double sgn)
     x += min_step * sgn * inv.col(k);
     inv.pivot (k, A.row(min_row), Ad(min_row));
     tab.pivot (k, min_key);
-    update_res (min_step);
+    res = A*x - b;
+    //update_res (Ad, min_step);
 
     assert (check());
 
     return true;
+}
+
+void State::update_res (const ColVector& Ad, double step)
+{
+    for (int i = tab.inactive; i < tab.end; ++i) {
+        int row_id = tab(i);
+        res (row_id) += step * Ad(row_id);
+    }
+
+    for (int i = 0; i < n; ++i) {
+        int row_id = tab.active()(i);
+        if (row_id >= 0)
+            res (row_id) = 0.0;
+    }
+}
+
+void State::update_res_from (const ColVector& r, const ColVector& Ad, double step)
+{
+    for (int i = tab.inactive; i < tab.end; ++i) {
+        int row_id = tab(i);
+        res (row_id) = r(row_id) + step * Ad(row_id);
+    }
+
+    for (int i = 0; i < n; ++i) {
+        int row_id = tab.active()(i);
+        if (row_id >= 0)
+            res (row_id) = 0.0;
+    }
 }
 
 void State::phase1()
@@ -101,7 +130,19 @@ void State::finish_leave (const State& S, const ColMatrix& AD, int k, const Pivo
     x = S.x + info.step * S.inv.col(k);
     inv.pivot_from (S.inv, k, A.row(info.row_id), AD.col(k)(info.row_id));
     tab.pivot_from (S.tab, k, info.tab_id);
-    update_res_from (S.res, info.step);
+    //update_res_from (S.res, AD.col(k), info.step);
+
+    for (int i = 0; i < m; ++i) {
+        if (S.tab.key[i])
+            res(i) = 0.0;
+        else
+            res(i) = S.res(i) + info.step * AD.col(k)(i);
+    }
+    res(info.row_id) = 0.0;
+    res(S.tab.active()(k)) = info.step;
+
+    known_dir.reset();
+    known_dir.set(k);
 
     assert (check());
 }
@@ -109,7 +150,14 @@ void State::finish_leave (const State& S, const ColMatrix& AD, int k, const Pivo
 bool State::check() const
 {
     assert (tab.check());
-    assert ((A*x-b - res).norm() < 1e-14);
+
+    //--- check residual -------------------------------------------------------
+    ColVector r = A*x - b;
+    for (int i = tab.inactive; i < tab.end; ++i) {
+        int row_id = tab(i);
+        assert (fabs(r(row_id) - res(row_id) < 1e-12));
+    }
+
     for (int k = 0; k < n; ++k) {
         if (tab(k) >= 0) {
             assert (tab(k) < m);
@@ -117,7 +165,7 @@ bool State::check() const
             for (int j = 0; j < n; ++j)
                 if (fabs(ek(j) - ( (j==k) ? 1.0 : 0.0)) > 1e-13)
                     ERROR("A[" << tab(k) << "] * D[" << j << "] = " << ek(j));
-            assert (fabs(res(tab(k))) < 1e-13);
+            //assert (fabs(res(tab(k))) < 1e-13);
         }
     }
 

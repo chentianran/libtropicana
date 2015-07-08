@@ -18,6 +18,7 @@ public:
     Lookup           tab;   // lookup table for contraints
     ColVector        x;     // state variable x
     ColVector        res;   // residual = Ax - b;
+    Key              known_dir;
 
     struct PivotInfo
     {
@@ -38,21 +39,16 @@ public:
         assert (A.rows() >= A.cols());
         n = _A.cols();
         m = _A.rows();
+        known_dir.reset();
+
         #ifndef NDEBUG
             for (int i = 0; i < m; ++i)
                 assert (A(i,n-1) == -1.0);
         #endif
     }
 
-    void update_res (double step)
-    {
-        res = A * x - b;
-    }
-
-    void update_res_from (const ColVector& r, double step)
-    {
-        res = A * x - b;
-    }
+    void update_res (const ColVector& Ad, double step);
+    void update_res_from (const ColVector& r, const ColVector& Ad, double step);
 
     bool leave (ColVector& Ad, int k, double sgn = 1.0);
     //bool leave_from (const State& S, const ColMatrix& AD, int k);
