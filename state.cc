@@ -86,12 +86,18 @@ void State::branch_out (ColMatrix& AD) const
         int row_id = tab(i);
         AD.row(row_id) = A.row(row_id) * inv;
         int n_neg = 0;
+        int k_neg = -1;
         for (int k = 0; k < n; ++k) {
-            if (AD.row(row_id)(k) < -1e-8)
+            if (AD.row(row_id)(k) < -1e-8) {
                 ++ n_neg;
+               k_neg = k;
+            }
         }
         if (0 == n_neg) {
             WARNING ("Redundant: " << row_id);
+        }
+        if (1 == n_neg) {
+            LOG(0,"Rel[" << tab.active()(k_neg) << "," << row_id << "] = 0")
         }
     }
 }
