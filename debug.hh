@@ -16,7 +16,7 @@ using std::ostream_iterator;
 using std::copy;
 using std::string;
 
-extern int _trop_verbose;
+extern int _trop_verbose;           // verbose level
 
 #define ERROR(message) { \
     std::stringstream s; \
@@ -32,6 +32,16 @@ extern int _trop_verbose;
 #else
 #define LOGVAR(i,VAR) {  }
 #define LOG(i,msg)    {  }
+#endif
+
+extern long long _stat_try_leave;       // number of times starting a "leave"
+extern long long _stat_finish_leave;    // number of times finishing a "leave"
+extern long long _stat_update_inv;  // number of times updating inverse
+
+#ifndef NDEBUG
+    #define COUNT(x) { ++x; }
+#else
+    #define COUNT(x) { }
 #endif
 
 #endif

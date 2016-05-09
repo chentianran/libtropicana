@@ -20,6 +20,7 @@ public:
 
     inline void pivot (int k, const RowVector& v, double hint)
     {
+        COUNT(_stat_update_inv);
         assert (k >= 0 && k < cols());
 
         col(k) /= hint;
@@ -30,6 +31,7 @@ public:
 
     inline void pivot_from (const Inverse& D, int k, const RowVector& v, double hint)
     {
+        COUNT(_stat_update_inv);
         assert (cols() == D.cols());
         assert (rows() == D.rows());
         assert (k >= 0 && k < cols());

@@ -109,6 +109,9 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
 
     LOG(0, "total cells: " << total_cells);
     LOG(0, "duplicated:  " << dup_discover);
+    LOG(0, "trying:      " << _stat_try_leave);
+    LOG(0, "finishing:   " << _stat_try_leave);
+    LOG(0, "update inv:  " << _stat_update_inv);
 
     for (State* s : heap)
         delete s;

@@ -104,6 +104,8 @@ void State::branch_out (ColMatrix& AD) const
 
 State::PivotInfo State::try_leave (const ColMatrix& AD, int k) const
 {
+    COUNT(_stat_try_leave);
+
     assert (k >= 0 && k < n);
 
     double min_step   = 0.0;
@@ -129,6 +131,8 @@ State::PivotInfo State::try_leave (const ColMatrix& AD, int k) const
 
 void State::finish_leave (const State& S, const ColMatrix& AD, int k, const PivotInfo& info)
 {
+    COUNT(_stat_finish_leave);
+
     assert (info.tab_id >= S.tab.inactive && info.tab_id < S.tab.end);
     assert (info.row_id >= 0 && info.row_id < S.m);
     assert (info.step > 0.0);
