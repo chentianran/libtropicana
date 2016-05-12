@@ -82,6 +82,10 @@ void State::phase1()
 
 void State::branch_out (ColMatrix& AD) const
 {
+    // TODO: skip known directions
+    // TODO: skip redundant constraints
+    // TODO: use relation table to skip more constraints
+
     for (int i = tab.inactive; i < tab.end; ++i) {
         int row_id = tab(i);
         AD.row(row_id) = A.row(row_id) * inv;
@@ -112,16 +116,18 @@ State::PivotInfo State::try_leave (const ColMatrix& AD, int k) const
     int    min_tab_id = -1;
     int    min_row_id = -1;
 
-    for (int i = tab.inactive; i < tab.end; ++i) {
-        int row_id = tab(i);
-        assert (row_id >= 0 && row_id < m);
-        double AiDk = AD.col(k)(row_id);
-        if (AiDk < -1e-8) {
-            double step = - res(row_id) / AiDk;
-            if (-1 == min_tab_id || step < min_step) {
-                min_step = step;
-                min_tab_id = i;
-                min_row_id = row_id;
+    for (int i = tab.inactive; i < tab.end; ++i) {      // for each constraint in the inactive group
+        // TODO: skip redundant constraints
+        // TODO: use relation table to skip more constraints
+        int row_id = tab(i);                            // get the actual row index
+        assert (row_id >= 0 && row_id < m);             // make sure the row index is valid
+        double AiDk = AD.col(k)(row_id);                // get A[i] * D[k]
+        if (AiDk < -1e-8) {                             // get A[i] * D[k] < 0
+            double step = - res(row_id) / AiDk;         // step = -(A[i] - b[i]) / (A[i] * D[k])
+            if (-1 == min_tab_id || step < min_step) {  // see if this step is even smaller than those before
+                min_step = step;                        // keeps track of the smallest step size
+                min_tab_id = i;                         // keeps track of the offset in lookup table
+                min_row_id = row_id;                    // ...as well as the actual row index in A
             }
         }
     }

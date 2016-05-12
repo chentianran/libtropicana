@@ -49,12 +49,11 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
     std::unordered_set<Key>   known;
     std::forward_list<State*> pool;
 
-    State* state = new State(A,b);
-    state->phase1();
-    //state->conv();
-    known.insert (state->tab.key);
-
-    pool.push_front (state);
+    State* v = new State(A,b);                  // create a root vertex
+    v->phase1();                                // solve the phase-one problem and reach a vertex
+    //v->conv();
+    known.insert (v->tab.key);                  // one vertex is known
+    pool.push_front (v);                        // this root vertex is to be explored
 
     volume = 0;
 
@@ -63,46 +62,44 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
     Eigen::internal::set_is_malloc_allowed(false);
 
     while (! pool.empty()) {
-        state = pool.front();
+        v = pool.front();
         pool.pop_front();
 
-        state->branch_out (AD);
+        v->branch_out (AD);                     // start to branch out
 
-        for (int k = 0; k < N; ++k) {
-            if (! state->known_dir[k]) {
-                int out_row = state->tab(k);
-                if (out_row >= 0) {
-                    State::PivotInfo info = state->try_leave (AD, k);
-                    if (info.tab_id >= 0) {
-                        Key key = state->tab.key;
-                        key.set   (info.row_id);
-                        key.reset (out_row);
+        for (int k = 0; k < N; ++k) {               // for each possible edge direction to leave this vertex
+            if (! v->known_dir[k]) {            // if this edge direction is not pointing to a known vertex
+                int out_row = v->tab(k);        // get the actual row index of the corresponding constraint
+                if (out_row >= 0) {                 // if this direction is not an Euclidean direction
+                    State::PivotInfo piv;               // for keeping track of intermediate data for pivoting
+                    piv = v->try_leave (AD, k);     // perform the first half of pivoting
+                    if (piv.tab_id >= 0) {              // if there is an incoming constraint
+                        Key key = v->tab.key;       // let's create the key of the new vertex
+                        key.set   (piv.row_id);         // ...suppose the incoming row is in
+                        key.reset (out_row);            // ...and the outgoing row is gone
                         if (known.end() == known.find (key)) {
                             known.insert (key);
-                            State* branch = new_state(A,b);
-                            branch->finish_leave (*state, AD, k, info);
-                            pool.push_front (branch);
-                            ++ pool_size;
+                            State* br = new_state(A,b);
+                            br->finish_leave (*v, AD, k, piv);
+                            pool.push_front (br);       // put the new vertex into the pool to be explored later
+                            ++ pool_size;               // keep track of the pool size
 
-                            //cout << state->tab.active() << " -> " << branch->tab.active() << "  (leaving " << k << ")" << endl;
+                            //cout << v->tab.active() << " -> " << branch->tab.active() << "  (leaving " << k << ")" << endl;
 
                         } else {
-                            //cout << state->tab.active() << " -> " << info.row_id << " in  (leaving " << k << ")" << endl;
+                            //cout << v->tab.active() << " -> " << info.row_id << " in  (leaving " << k << ")" << endl;
                             ++ dup_discover;
                         }
                     }
                 }
             }
-        }
+        }                                           // finished exploring this vertex
 
-        Cell cell (*state);
-
-        volume += cell.vol();
-
-        del_state (state);
-        -- pool_size;
-
-        ++ total_cells;
+        Cell cell (*v);                         // this vertex will now be converted into a cell
+        volume += cell.vol();                       // compute the volume and keep the total volume
+        del_state (v);                          // this vertex is now useless and can be released
+        -- pool_size;                               // keep track of the pool size
+        ++ total_cells;                             // keep track of the total cells
 
         LOG(1, "pool: " << pool_size);
     }
