@@ -76,24 +76,23 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
                 int out_row = v->tab(k);                // get the actual row index of the corresponding constraint
                 if (out_row >= 0) {                     // if this direction is not an Euclidean direction
                     State::PivotInfo piv;               // for keeping track of intermediate data for pivoting
-                    piv = v->try_leave (AD, k);         // perform the first half of pivoting
+                    piv = v->leave (AD, k);             // try to leave this vertex along the k-th direction
                     if (piv.tab_id >= 0) {              // if there is an incoming constraint
                         Key key = v->tab.key;           // let's create the key of the new vertex
                         key.set   (piv.row_id);         // ...suppose the incoming row is in
                         key.reset (out_row);            // ...and the outgoing row is gone
-                        ins = keytab.try_insert (key);
-                        if (ins.inserted()) {
-                            State* br = new_state(A,b);
-                            br->finish_leave (*v, AD, k, piv);
-                            ins.state() = br;
+                        ins = keytab.try_insert (key);  // try to insert the new key into the key-table
+                        if (ins.inserted()) {           // if insertion is successful, ie., no such key existed
+                            State* br = new_state(A,b); // then the branch state is unknown, we create it now
+                            br->arrive (*v,AD,k,piv);   // reach the new vertex by finishing the pivoting process
+                            ins.state() = br;           // save the state pointer into the key-table
                             pool.push_front (br);       // put the new vertex into the pool to be explored later
                             ++ pool_size;               // keep track of the pool size
-
                         } else {                        // if the adjacent vertex is already known
                             State* adj = ins.state();   // get the pointer to adjacent state
                             if (adj)                    // if that adjacent state is still to be explored
                                 adj->known_dir[k] = 1;  // flag the direction as known
-                            ++ dup_discover;            // keep track of the duplicated discovery
+                            COUNT(dup_discover);        // keep track of the duplicated discovery
                         }
                     }
                 }

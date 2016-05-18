@@ -1,6 +1,6 @@
 #include "state.hh"
 
-bool State::leave (ColVector& Ad, int k, double sgn)
+bool State::move (ColVector& Ad, int k, double sgn)
 {
     assert (k >= 0 && k < n);
 
@@ -74,8 +74,8 @@ void State::phase1()
     res = A * x - b;
 
     for (int k = 0; k < n; ++k)
-        if (! leave (Ad, k, 1.0))
-            leave (Ad, k, -1.0);
+        if (! move (Ad, k, 1.0))
+            move (Ad, k, -1.0);
 
     assert (check());
 }
@@ -106,7 +106,7 @@ void State::branch_out (ColMatrix& AD) const
     }
 }
 
-State::PivotInfo State::try_leave (const ColMatrix& AD, int k) const
+State::PivotInfo State::leave (const ColMatrix& AD, int k) const
 {
     COUNT(_stat_try_leave);
 
@@ -135,7 +135,7 @@ State::PivotInfo State::try_leave (const ColMatrix& AD, int k) const
     return PivotInfo {min_tab_id, min_row_id, min_step};
 }
 
-void State::finish_leave (const State& S, const ColMatrix& AD, int k, const PivotInfo& info)
+void State::arrive (const State& S, const ColMatrix& AD, int k, const PivotInfo& info)
 {
     COUNT(_stat_finish_leave);
 
