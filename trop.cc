@@ -69,14 +69,14 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
         v = pool.front();
         pool.pop_front();
 
-        v->branch_out (AD);                             // start to branch out
+        v->branch_out (AD);                     // start to branch out
 
         for (int k = 0; k < N; ++k) {                   // for each possible edge direction to leave this vertex
             if (! v->known_dir[k]) {                    // if this edge direction is not pointing to a known vertex
                 int out_row = v->tab(k);                // get the actual row index of the corresponding constraint
                 if (out_row >= 0) {                     // if this direction is not an Euclidean direction
                     State::PivotInfo piv;               // for keeping track of intermediate data for pivoting
-                    piv = v->leave (AD, k);             // try to leave this vertex along the k-th direction
+                    piv = v->leave (AD, k);     // try to leave this vertex along the k-th direction
                     if (piv.tab_id >= 0) {              // if there is an incoming constraint
                         Key key = v->tab.key;           // let's create the key of the new vertex
                         key.set   (piv.row_id);         // ...suppose the incoming row is in

@@ -1,4 +1,5 @@
 #include "state.hh"
+//#include "reltab.hh"
 
 bool State::move (ColVector& Ad, int k, double sgn)
 {
@@ -28,7 +29,6 @@ bool State::move (ColVector& Ad, int k, double sgn)
     inv.pivot (k, A.row(min_row), Ad(min_row));
     tab.pivot (k, min_key);
     res = A*x - b;
-    //update_res (Ad, min_step);
 
     assert (check());
 
@@ -82,27 +82,36 @@ void State::phase1()
 
 void State::branch_out (ColMatrix& AD) const
 {
-    // TODO: skip known directions
     // TODO: skip redundant constraints
     // TODO: use relation table to skip more constraints
 
     for (int i = tab.inactive; i < tab.end; ++i) {
         int row_id = tab(i);
-        AD.row(row_id) = A.row(row_id) * inv;
-        int n_neg = 0;
-        int k_neg = -1;
         for (int k = 0; k < n; ++k) {
-            if (AD.row(row_id)(k) < -1e-8) {
-                ++ n_neg;
-               k_neg = k;
+            if (tab.active()(k) >= 0) {
+                if (! known_dir[k]) {
+                    double AiDk;
+                    AiDk = A.row(row_id) * inv.col(k);
+                    AD (row_id,k) = AiDk;
+                }
             }
         }
-        if (0 == n_neg) {
-            WARNING ("Redundant: " << row_id);
-        }
-        if (1 == n_neg) {
-            LOG(0,"Rel[" << tab.active()(k_neg) << "," << row_id << "] = 0")
-        }
+//        AD.row(row_id) = A.row(row_id) * inv;
+//        int n_neg = 0;
+//        int k_neg = -1;
+//        for (int k = 0; k < n; ++k) {
+//            if (AD.row(row_id)(k) < -1e-8) {
+//                ++ n_neg;
+//               k_neg = k;
+//            }
+//        }
+//        if (0 == n_neg) {
+//            //WARNING ("Redundant: " << row_id);
+//        }
+//        if (1 == n_neg) {
+//            int dir_id = tab.active()(k_neg);   // the active constraint
+//            reltab.mutex (dir_id, row_id);
+//        }
     }
 }
 
@@ -128,6 +137,7 @@ State::PivotInfo State::leave (const ColMatrix& AD, int k) const
                 min_step = step;                        // keeps track of the smallest step size
                 min_tab_id = i;                         // keeps track of the offset in lookup table
                 min_row_id = row_id;                    // ...as well as the actual row index in A
+                assert (min_step > 1e-8);
             }
         }
     }
@@ -146,7 +156,6 @@ void State::arrive (const State& S, const ColMatrix& AD, int k, const PivotInfo&
     x = S.x + info.step * S.inv.col(k);
     inv.pivot_from (S.inv, k, A.row(info.row_id), AD.col(k)(info.row_id));
     tab.pivot_from (S.tab, k, info.tab_id);
-    //update_res_from (S.res, AD.col(k), info.step);
 
     for (int i = 0; i < m; ++i) {
         if (S.tab.key[i])
@@ -169,11 +178,18 @@ bool State::check() const
 
     //--- check residual -------------------------------------------------------
     ColVector r = A*x - b;
+    for (int i = 0; i < n; ++i) {       // for each active constraint
+        int row_id = tab(i);
+        if (row_id >= 0)
+        assert (fabs(r(row_id)) < 1e-8);
+    }
     for (int i = tab.inactive; i < tab.end; ++i) {
         int row_id = tab(i);
+        assert (fabs(r(row_id)) > 1e-8);
         assert (fabs(r(row_id) - res(row_id) < 1e-12));
     }
 
+    //--- check inverse --------------------------------------------------------
     for (int k = 0; k < n; ++k) {
         if (tab(k) >= 0) {
             assert (tab(k) < m);
@@ -181,7 +197,6 @@ bool State::check() const
             for (int j = 0; j < n; ++j)
                 if (fabs(ek(j) - ( (j==k) ? 1.0 : 0.0)) > 1e-13)
                     ERROR("A[" << tab(k) << "] * D[" << j << "] = " << ek(j));
-            //assert (fabs(res(tab(k))) < 1e-13);
         }
     }
 
