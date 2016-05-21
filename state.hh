@@ -56,11 +56,6 @@ public:
         #endif
     }
 
-    /// Update the residual (Ax-b).
-    void update_res (const ColVector& Ad, double step);
-
-    void update_res_from (const ColVector& r, const ColVector& Ad, double step);
-
     /// Move a feasible solution toward a given direction.
     /// This function moves a feasible solution toward the k-th outgoing 
     /// direction given by the basic inverse matrix.
@@ -77,7 +72,7 @@ public:
     bool move (ColVector& Ad, int k, double sgn = 1.0);
 
     void phase1();
-    //void conv();
+
     void branch_out (ColMatrix& AD) const;
 
     /// First half of the computation for moving from one vertex to an adjacent one.

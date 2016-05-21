@@ -35,34 +35,6 @@ bool State::move (ColVector& Ad, int k, double sgn)
     return true;
 }
 
-void State::update_res (const ColVector& Ad, double step)
-{
-    for (int i = tab.inactive; i < tab.end; ++i) {
-        int row_id = tab(i);
-        res (row_id) += step * Ad(row_id);
-    }
-
-    for (int i = 0; i < n; ++i) {
-        int row_id = tab.active()(i);
-        if (row_id >= 0)
-            res (row_id) = 0.0;
-    }
-}
-
-void State::update_res_from (const ColVector& r, const ColVector& Ad, double step)
-{
-    for (int i = tab.inactive; i < tab.end; ++i) {
-        int row_id = tab(i);
-        res (row_id) = r(row_id) + step * Ad(row_id);
-    }
-
-    for (int i = 0; i < n; ++i) {
-        int row_id = tab.active()(i);
-        if (row_id >= 0)
-            res (row_id) = 0.0;
-    }
-}
-
 void State::phase1()
 {
     ColVector Ad (m);
