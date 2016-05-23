@@ -1,11 +1,16 @@
 cmake_minimum_required (VERSION 2.8)
 
-
 project (trop CXX)
 enable_testing()
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 #set (CMAKE_CXX_STANDARD 11)
+
+option(USE_SPARSE "Use sparse matrix in the core algorithm" OFF)
+
+if(USE_SPARSE)
+    add_definitions(-DUSE_SPARSE)
+endif()
 
 find_package (Boost 1.44.0 REQUIRED COMPONENTS system timer unit_test_framework)
 
