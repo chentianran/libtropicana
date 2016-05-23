@@ -8,7 +8,7 @@
 void Trop::more_verbose() { ++ _trop_verbose; }
 void Trop::less_verbose() { -- _trop_verbose; }
 
-State* Trop::new_state (const RowMatrix& A, const ColVector& b)
+State* Trop::new_state (const Core& A, const ColVector& b)
 {
     State* new_state;
     if (! heap.empty()) {
@@ -38,7 +38,7 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
     int max_pool = 0;
     int total_cells = 0;
 
-    RowMatrix A  (m, n+1);                              // support matrix
+    Core A  (m, n+1);                              // support matrix
     ColMatrix AD (m, n+1);                              // A * D buffer
     ColVector b  (m);                                   // right hand side
 
