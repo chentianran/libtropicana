@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 using std::fabs;
 using std::round;
@@ -17,6 +18,8 @@ typedef Eigen::Matrix<double, 1,Eigen::Dynamic> RowVector;
 typedef Eigen::Matrix<double, Eigen::Dynamic,1> ColVector;
 
 typedef Eigen::Matrix<int, 1,Eigen::Dynamic> VectorI;
+
+typedef Eigen::SparseMatrix<double,Eigen::RowMajor> SparseRowMatrix;
 
 typedef long long VolType;
 

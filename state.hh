@@ -50,11 +50,6 @@ public:
         n = _A.cols();
         m = _A.rows();
         known_dir.reset();
-
-        #ifndef NDEBUG
-            for (int i = 0; i < m; ++i)
-                assert (A(i,n-1) == -1.0);
-        #endif
     }
 
     /// Move a feasible solution toward a given direction.
