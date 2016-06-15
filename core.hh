@@ -45,6 +45,10 @@ public:
     }
 };
 
+#ifdef USE_SPARSE
 typedef CoreSparse Core;
+#else
+typedef CoreDense Core;
+#endif
 
 #endif
