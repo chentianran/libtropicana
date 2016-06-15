@@ -106,14 +106,16 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
         -- pool_size;                                   // keep track of the pool size
         ++ total_cells;                                 // keep track of the total cells
 
-        LOG(1, "pool: " << pool_size);
+        //LOG(1, "pool: " << pool_size);
+        MONITOR (pool_size, _peak_pool_size);
     }
 
     LOG(0, "total cells: " << total_cells);
     LOG(0, "duplicated:  " << dup_discover);
     LOG(0, "trying:      " << _stat_try_leave);
-    LOG(0, "finishing:   " << _stat_try_leave);
+    LOG(0, "finishing:   " << _stat_arrive);
     LOG(0, "update inv:  " << _stat_update_inv);
+    LOG(0, "peak pool:   " << _peak_pool_size);
 
     for (State* s : heap)
         delete s;

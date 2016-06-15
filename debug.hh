@@ -34,14 +34,17 @@ extern int _trop_verbose;           // verbose level
 #define LOG(i,msg)    {  }
 #endif
 
-extern long long _stat_try_leave;       // number of times starting a "leave"
-extern long long _stat_finish_leave;    // number of times finishing a "leave"
+extern long long _stat_try_leave;   // number of times starting a "leave"
+extern long long _stat_arrive;      // number of times finishing a "leave"
 extern long long _stat_update_inv;  // number of times updating inverse
+extern long long _peak_pool_size;   // peak pool size
 
 #ifndef NDEBUG
     #define COUNT(x) { ++x; }
+    #define MONITOR(x,peak) { if (x > peak) { peak = x; } }
 #else
     #define COUNT(x) { }
+    #define MONITOR(x,peak) { }
 #endif
 
 #endif

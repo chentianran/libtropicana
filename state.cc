@@ -119,7 +119,7 @@ State::PivotInfo State::leave (const ColMatrix& AD, int k) const
 
 void State::arrive (const State& S, const ColMatrix& AD, int k, const PivotInfo& info)
 {
-    COUNT(_stat_finish_leave);
+    COUNT(_stat_arrive);
 
     assert (info.tab_id >= S.tab.inactive && info.tab_id < S.tab.end);
     assert (info.row_id >= 0 && info.row_id < S.m);
