@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 #include "inverse.hh"
 #include "lookup.hh"
+#include "core.hh"
 
 /// A state object describes a feasible solution of an inequality Ax ?= b.
 /// It also holds information useful in further computation.
@@ -12,7 +13,7 @@ class State
 {
 public:
 
-    const RowMatrix& A;         ///< The constraint matrix for the LP problem
+    const Core&      A;         ///< The constraint matrix for the LP problem
     const ColVector& b;         ///< The right hand side for the LP problem
     int              n;         ///< Dimension of the LP problem (i.e. the n.o. columns in A and length of x)
     int              m;         ///< Total number of constraints (i.e. the n.o. rows in A)
@@ -36,7 +37,7 @@ public:
     /// Constructor that initializes the system of inequalities.
     /// Note that a state only keeps the references to A and b and does not
     /// copy the data.
-    State (const RowMatrix& _A, const ColVector& _b) :
+    State (const Core& _A, const ColVector& _b) :
         A(_A),
         b(_b),
         inv(_A.cols()),
@@ -49,11 +50,6 @@ public:
         n = _A.cols();
         m = _A.rows();
         known_dir.reset();
-
-        #ifndef NDEBUG
-            for (int i = 0; i < m; ++i)
-                assert (A(i,n-1) == -1.0);
-        #endif
     }
 
     /// Move a feasible solution toward a given direction.

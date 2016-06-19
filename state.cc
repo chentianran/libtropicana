@@ -12,7 +12,7 @@ bool State::move (ColVector& Ad, int k, double sgn)
     for (int i = tab.inactive; i < tab.end; ++i) {
         int row_id = tab(i);
         assert (row_id >= 0 && row_id < m);
-        if ( sgn * (Ad(row_id) = A.row(row_id) * inv.col(k)) < -1e-8) {
+        if ( sgn * (Ad(row_id) = A.row(row_id).dot(inv.col(k))) < -1e-8) {
             double step = - sgn* res(row_id) / Ad(row_id);
             if (-1 == min_key || step < min_step) {
                 min_step = step;
@@ -63,7 +63,7 @@ void State::branch_out (ColMatrix& AD) const
             if (tab.active()(k) >= 0) {
                 if (! known_dir[k]) {
                     double AiDk;
-                    AiDk = A.row(row_id) * inv.col(k);
+                    AiDk = A.row(row_id).dot (inv.col(k));
                     AD (row_id,k) = AiDk;
                 }
             }
@@ -119,7 +119,7 @@ State::PivotInfo State::leave (const ColMatrix& AD, int k) const
 
 void State::arrive (const State& S, const ColMatrix& AD, int k, const PivotInfo& info)
 {
-    COUNT(_stat_finish_leave);
+    COUNT(_stat_arrive);
 
     assert (info.tab_id >= S.tab.inactive && info.tab_id < S.tab.end);
     assert (info.row_id >= 0 && info.row_id < S.m);

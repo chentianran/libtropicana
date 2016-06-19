@@ -1,11 +1,16 @@
 cmake_minimum_required (VERSION 2.8)
 
-
 project (trop CXX)
 enable_testing()
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 #set (CMAKE_CXX_STANDARD 11)
+
+option(USE_SPARSE "Use sparse matrix in the core algorithm" OFF)
+
+if(USE_SPARSE)
+    add_definitions(-DUSE_SPARSE)
+endif()
 
 find_package (Boost 1.44.0 REQUIRED COMPONENTS system timer unit_test_framework)
 
@@ -15,26 +20,24 @@ include_directories ("${Boost_INCLUDE_DIRS}")
 include_directories ("${EIGEN3_INCLUDE_DIR}")
 include_directories ("${CMAKE_CURRENT_LIST_DIR}")
 
-add_library(tropicana STATIC
-    inverse.hh
-    lookup.hh
-    debug.hh debug.cc
-    state.hh state.cc
-    cell.hh cell.cc
-    trop.hh trop.cc)
+add_library(tropicana_dn STATIC inverse.hh lookup.hh debug.hh debug.cc state.hh state.cc cell.hh cell.cc trop.hh trop.cc)
+add_library(tropicana_sp STATIC inverse.hh lookup.hh debug.hh debug.cc state.hh state.cc cell.hh cell.cc trop.hh trop.cc)
+set_target_properties (tropicana_sp PROPERTIES COMPILE_FLAGS -DUSE_SPARSE )
 
-target_link_libraries (tropicana ${Boost_LIBRARIES})
+target_link_libraries (tropicana_dn ${Boost_LIBRARIES})
+target_link_libraries (tropicana_sp ${Boost_LIBRARIES})
 
-add_executable(tropicon main.cc)
-target_link_libraries (tropicon tropicana)
+add_executable(tropicon-dn main.cc)
+target_link_libraries (tropicon-dn tropicana_dn)
 
-add_executable(pivot-perf tests/pivot_perf.cc)
-target_link_libraries (pivot-perf tropicana)
+add_executable(tropicon-sp main.cc)
+target_link_libraries (tropicon-sp tropicana_sp)
 
-add_executable(tests
-    tests/square.cc
-    tests/cube.cc
-    tests/hypercube.cc
-    tests/main.cc)
-target_link_libraries (tests tropicana)
-#add_test( square)
+#add_executable(pivot-perf tests/pivot_perf.cc)
+#target_link_libraries (pivot-perf tropicana)
+
+add_executable(tests-dn tests/square.cc tests/cube.cc tests/hypercube.cc tests/main.cc)
+target_link_libraries (tests-dn tropicana_dn)
+
+add_executable(tests-sp tests/square.cc tests/cube.cc tests/hypercube.cc tests/main.cc)
+target_link_libraries (tests-sp tropicana_sp)
