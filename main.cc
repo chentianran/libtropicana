@@ -24,7 +24,10 @@ vector<double> get_vector (const std::string& line)
 
 int main ()
 {
+    clog << "libtropicana v0.1 Copyright (C) 2016 Tianran Chen" << endl;
+
     try {
+
 
         vector< vector<double> > rows;
         int n = 0;                                                       // keep track of maximum size of each line
@@ -46,16 +49,13 @@ int main ()
             for (int j = 0; j < rows[i].size(); ++j)
                 A(i,j) = rows[i][j];
 
-        cout << A << endl;
-
         Trop trop;
 
 
         trop.compute (A);
 
-        cout << "Volume: " << trop.volume << endl;
+        cout << "Normalized-volume: " << trop.volume << endl;
 
-        //cout << "B*D = \n" << (B*D) << endl << endl;
     } catch (const char* err) {
         cerr << err << endl;
         return 1;

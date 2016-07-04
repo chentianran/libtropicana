@@ -41,3 +41,9 @@ target_link_libraries (tests-dn tropicana_dn)
 
 add_executable(tests-sp tests/square.cc tests/cube.cc tests/hypercube.cc tests/main.cc)
 target_link_libraries (tests-sp tropicana_sp)
+
+install (TARGETS tropicon-dn DESTINATION bin)
+install (TARGETS tropicon-sp DESTINATION bin)
+install (TARGETS tropicana_dn DESTINATION lib)
+install (TARGETS tropicana_sp DESTINATION lib)
+
