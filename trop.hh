@@ -3,6 +3,7 @@
 
 #include <forward_list>
 #include "basic.hh"
+#include "core.hh"
 
 class State;
 
@@ -15,7 +16,7 @@ struct Trop
 
     std::forward_list<State*> heap;
 
-    State* new_state (const RowMatrix& A, const ColVector& b);
+    State* new_state (const Core& A, const ColVector& b);
     void del_state (State* state);
 
     void compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol = true);
