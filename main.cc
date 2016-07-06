@@ -24,7 +24,7 @@ vector<double> get_vector (const std::string& line)
 
 int main ()
 {
-    clog << "libtropicana v0.1 Copyright (C) 2016 Tianran Chen" << endl;
+    clog << "libtropicana v0.1.1 Copyright (C) 2016 Tianran Chen" << endl;
 
     try {
 
