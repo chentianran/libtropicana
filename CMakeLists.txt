@@ -12,17 +12,24 @@ if(USE_SPARSE)
     add_definitions(-DUSE_SPARSE)
 endif()
 
-find_package (Boost 1.44.0 REQUIRED COMPONENTS system timer unit_test_framework)
+find_package(PythonLibs 3.6 REQUIRED)
+find_package (Boost 1.63.0 REQUIRED COMPONENTS system timer unit_test_framework python3 numpy3)
 
 find_package (Eigen3 REQUIRED)
 
+include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories ("${Boost_INCLUDE_DIRS}")
 include_directories ("${EIGEN3_INCLUDE_DIR}")
 include_directories ("${CMAKE_CURRENT_LIST_DIR}")
 
 add_library(tropicana_dn STATIC inverse.hh lookup.hh debug.hh debug.cc state.hh state.cc cell.hh cell.cc trop.hh trop.cc)
 add_library(tropicana_sp STATIC inverse.hh lookup.hh debug.hh debug.cc state.hh state.cc cell.hh cell.cc trop.hh trop.cc)
+set_target_properties (tropicana_dn PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties (tropicana_sp PROPERTIES COMPILE_FLAGS -DUSE_SPARSE )
+
+add_library(pytropicana SHARED python.cc)
+set_target_properties(pytropicana PROPERTIES PREFIX "")
+target_link_libraries (pytropicana tropicana_dn)
 
 target_link_libraries (tropicana_dn ${Boost_LIBRARIES})
 target_link_libraries (tropicana_sp ${Boost_LIBRARIES})
@@ -46,4 +53,5 @@ install (TARGETS tropicon-dn DESTINATION bin)
 install (TARGETS tropicon-sp DESTINATION bin)
 install (TARGETS tropicana_dn DESTINATION lib)
 install (TARGETS tropicana_sp DESTINATION lib)
+install (TARGETS pytropicana  DESTINATION lib)
 
