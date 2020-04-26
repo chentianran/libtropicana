@@ -53,4 +53,5 @@ install (TARGETS tropicon-dn DESTINATION bin)
 install (TARGETS tropicon-sp DESTINATION bin)
 install (TARGETS tropicana_dn DESTINATION lib)
 install (TARGETS tropicana_sp DESTINATION lib)
+install (TARGETS pytropicana  DESTINATION lib)
 
