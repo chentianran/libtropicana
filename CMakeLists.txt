@@ -13,7 +13,7 @@ if(USE_SPARSE)
 endif()
 
 find_package(PythonLibs 3.6 REQUIRED)
-find_package (Boost 1.44.0 REQUIRED COMPONENTS system timer unit_test_framework python3 numpy3)
+find_package (Boost 1.63.0 REQUIRED COMPONENTS system timer unit_test_framework python3 numpy3)
 
 find_package (Eigen3 REQUIRED)
 
