@@ -12,12 +12,17 @@ if(USE_SPARSE)
     add_definitions(-DUSE_SPARSE)
 endif()
 
-find_package(PythonLibs 3.6 REQUIRED)
-find_package (Boost 1.63.0 REQUIRED COMPONENTS system timer unit_test_framework python3 numpy3)
+if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER_EQUAL 3.12)
+    find_package (Python3 COMPONENTS Development)
+    include_directories ("${Python3_INCLUDE_DIRS}")
+else (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER_EQUAL 3.12)
+    find_package(PythonLibs 3.6 REQUIRED)
+    include_directories ("${PYTHON_INCLUDE_DIRS}")
+endif(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER_EQUAL 3.12)
 
+find_package (Boost 1.63.0 REQUIRED COMPONENTS system timer unit_test_framework python3 numpy3)
 find_package (Eigen3 REQUIRED)
 
-include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories ("${Boost_INCLUDE_DIRS}")
 include_directories ("${EIGEN3_INCLUDE_DIR}")
 include_directories ("${CMAKE_CURRENT_LIST_DIR}")
@@ -29,10 +34,10 @@ set_target_properties (tropicana_sp PROPERTIES COMPILE_FLAGS -DUSE_SPARSE )
 
 add_library(pytropicana SHARED python.cc)
 set_target_properties(pytropicana PROPERTIES PREFIX "")
-target_link_libraries (pytropicana tropicana_dn)
+target_link_libraries (pytropicana tropicana_dn Boost::python3 Boost::numpy3)
 
-target_link_libraries (tropicana_dn ${Boost_LIBRARIES})
-target_link_libraries (tropicana_sp ${Boost_LIBRARIES})
+target_link_libraries (tropicana_dn)
+target_link_libraries (tropicana_sp)
 
 add_executable(tropicon-dn main.cc)
 target_link_libraries (tropicon-dn tropicana_dn)
@@ -44,10 +49,10 @@ target_link_libraries (tropicon-sp tropicana_sp)
 #target_link_libraries (pivot-perf tropicana)
 
 add_executable(tests-dn tests/square.cc tests/cube.cc tests/hypercube.cc tests/main.cc)
-target_link_libraries (tests-dn tropicana_dn)
+target_link_libraries (tests-dn tropicana_dn Boost::unit_test_framework)
 
 add_executable(tests-sp tests/square.cc tests/cube.cc tests/hypercube.cc tests/main.cc)
-target_link_libraries (tests-sp tropicana_sp)
+target_link_libraries (tests-sp tropicana_sp Boost::unit_test_framework)
 
 install (TARGETS tropicon-dn DESTINATION bin)
 install (TARGETS tropicon-sp DESTINATION bin)
