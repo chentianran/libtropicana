@@ -1,5 +1,5 @@
-#ifndef _BASIC_HH_
-#define _BASIC_HH_
+#ifndef _TROP_BASIC_HH_
+#define _TROP_BASIC_HH_
 
 #include <cmath>
 #include <vector>
