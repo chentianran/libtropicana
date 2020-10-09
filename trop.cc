@@ -28,8 +28,14 @@ void Trop::del_state (State* state)
     heap.push_front (state);
 }
 
-void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
+void Trop::compute (const Eigen::Ref<RowMatrix>& supp)
 {
+    if (! cells.empty()) {
+        for (Cell* c : cells)
+            delete c;
+        cells.clear();
+    }
+
     const int n = supp.cols();
     const int m = supp.rows();
     const int N = n + 1;
@@ -100,8 +106,17 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
         //assert (keytab.has(v->tab.key));              // the current node must already be known
         keytab[v->tab.key] = 0;                         // reset the cached pointer because we are destroying v
 
-        Cell cell (*v);                                 // this vertex will now be converted into a cell
-        volume += cell.vol();                           // compute the volume and keep the total volume
+        if (keep_cells) {
+            Cell* cell = new Cell (*v);
+            if (compute_volume)
+                volume += cell->vol();                  // compute the volume and keep the total volume
+            cells.push_front (cell);
+        } else {
+            Cell cell (*v);                             // this vertex will now be converted into a cell
+            if (compute_volume)
+                volume += cell.vol();                   // compute the volume and keep the total volume
+        }
+
         del_state (v);                                  // this vertex is now useless and can be released
         -- pool_size;                                   // keep track of the pool size
         ++ total_cells;                                 // keep track of the total cells
@@ -120,3 +135,13 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp, bool compute_vol)
     for (State* s : heap)
         delete s;
 }
+
+Trop::~Trop()
+{
+    if (! cells.empty()) {
+        for (Cell* c : cells)
+            delete c;
+        cells.clear();
+    }
+}
+
