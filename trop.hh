@@ -13,6 +13,8 @@ struct Trop
     bool compute_volume;
     bool keep_cells;
 
+    ColVector lifting;
+
     Trop() : compute_volume(true), keep_cells(true) { }
     ~Trop();
 

@@ -66,7 +66,6 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp)
 
     long long pool_size = 1;
 
-
     Eigen::internal::set_is_malloc_allowed(false);
 
     while (! pool.empty()) {
@@ -134,6 +133,8 @@ void Trop::compute (const Eigen::Ref<RowMatrix>& supp)
 
     for (State* s : heap)
         delete s;
+
+    lifting = b;
 }
 
 Trop::~Trop()
