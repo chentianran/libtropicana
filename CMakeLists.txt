@@ -20,7 +20,7 @@ else (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER_EQUAL 3.12)
     include_directories ("${PYTHON_INCLUDE_DIRS}")
 endif(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER_EQUAL 3.12)
 
-find_package (Boost 1.63.0 REQUIRED COMPONENTS system timer unit_test_framework python3 numpy3)
+find_package (Boost 1.63.0 REQUIRED COMPONENTS system timer unit_test_framework python numpy)
 find_package (Eigen3 REQUIRED)
 
 include_directories ("${Boost_INCLUDE_DIRS}")
@@ -34,7 +34,7 @@ set_target_properties (tropicana_sp PROPERTIES COMPILE_FLAGS -DUSE_SPARSE )
 
 add_library(pytropicana SHARED python.cc)
 set_target_properties(pytropicana PROPERTIES PREFIX "")
-target_link_libraries (pytropicana tropicana_dn Boost::python3 Boost::numpy3)
+target_link_libraries (pytropicana tropicana_dn Boost::python Boost::numpy)
 
 target_link_libraries (tropicana_dn)
 target_link_libraries (tropicana_sp)
